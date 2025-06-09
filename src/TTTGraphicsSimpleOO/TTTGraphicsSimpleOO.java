@@ -26,7 +26,7 @@ public class TTTGraphicsSimpleOO extends JFrame {
     public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
     public static final Color COLOR_GRID   = Color.LIGHT_GRAY;  // grid lines
     public static final Color COLOR_CROSS  = new Color(211, 45, 65);  // Red #D32D41
-    public static final Color COLOR_NOUGHT = new Color(76, 181, 245); // Blue #4CB5F5
+    public static final Color COLOR_NOUGHT = new Color(76, 180, 245); // Blue #4CB5F5
     public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
 
     // This enum (inner class) contains the various states of the game

@@ -1,11 +1,11 @@
-package TTTGraphics;
+package TTTGraphicsSimpleOO;
 import java.awt.*;
         import java.awt.event.*;
         import javax.swing.*;
 /**
  * Tic-Tac-Toe: Two-player Graphics version with Simple-OO in one class
  */
-public class TTTGraphicsjavasimpleOO extends JFrame {
+public class TTTGraphicsSimpleOO extends JFrame {
     private static final long serialVersionUID = 1L; // to prevent serializable warning
 
     // Define named constants for the game board
@@ -49,7 +49,7 @@ public class TTTGraphicsjavasimpleOO extends JFrame {
     private JLabel statusBar;  // Status Bar
 
     /** Constructor to setup the game and the GUI components */
-    public TTTGraphicsjavasimpleOO() {
+    public TTTGraphicsSimpleOO() {
         // Initialize the game objects
         initGame();
 
@@ -225,7 +225,7 @@ public class TTTGraphicsjavasimpleOO extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new TTTGraphicsjavasimpleOO(); // Let the constructor do the job
+                new TTTGraphicsSimpleOO(); // Let the constructor do the job
             }
         });
     }

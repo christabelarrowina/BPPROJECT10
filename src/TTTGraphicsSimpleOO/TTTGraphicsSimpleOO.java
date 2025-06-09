@@ -1,11 +1,11 @@
-package TTTGraphics;
+package TTTGraphicsSimpleOO;
 import java.awt.*;
         import java.awt.event.*;
         import javax.swing.*;
 /**
  * Tic-Tac-Toe: Two-player Graphics version with Simple-OO in one class
  */
-public class TTTGraphicsjavasimpleOO extends JFrame {
+public class TTTGraphicsSimpleOO extends JFrame {
     private static final long serialVersionUID = 1L; // to prevent serializable warning
 
     // Define named constants for the game board
@@ -26,7 +26,7 @@ public class TTTGraphicsjavasimpleOO extends JFrame {
     public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
     public static final Color COLOR_GRID   = Color.LIGHT_GRAY;  // grid lines
     public static final Color COLOR_CROSS  = new Color(211, 45, 65);  // Red #D32D41
-    public static final Color COLOR_NOUGHT = new Color(76, 181, 245); // Blue #4CB5F5
+    public static final Color COLOR_NOUGHT = new Color(76, 180, 245); // Blue #4CB5F5
     public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
 
     // This enum (inner class) contains the various states of the game
@@ -49,7 +49,7 @@ public class TTTGraphicsjavasimpleOO extends JFrame {
     private JLabel statusBar;  // Status Bar
 
     /** Constructor to setup the game and the GUI components */
-    public TTTGraphicsjavasimpleOO() {
+    public TTTGraphicsSimpleOO() {
         // Initialize the game objects
         initGame();
 
@@ -225,7 +225,7 @@ public class TTTGraphicsjavasimpleOO extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new TTTGraphicsjavasimpleOO(); // Let the constructor do the job
+                new TTTGraphicsSimpleOO(); // Let the constructor do the job
             }
         });
     }

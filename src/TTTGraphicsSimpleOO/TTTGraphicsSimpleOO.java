@@ -10,8 +10,8 @@ import javax.swing.*;
         private static final long serialVersionUID = 1L; // to prevent serializable warning
 
         // Define named constants for the game board
-        public static final int ROWS = 5;  // ROWS x COLS cells
-        public static final int COLS = 5;
+        public static final int ROWS = 3;  // ROWS x COLS cells
+        public static final int COLS = 3;
 
         // Define named constants for the drawing graphics
         public static final int CELL_SIZE = 120; // cell width/height (square)

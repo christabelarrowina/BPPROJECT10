@@ -79,6 +79,10 @@ import javax.swing.*;
                     } else {       // game over
                         newGame(); // restart the game
                     }
+
+
+
+
                     // Refresh the drawing canvas
                     repaint();  // Callback paintComponent().
                 }

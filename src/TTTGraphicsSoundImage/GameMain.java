@@ -9,37 +9,38 @@ import javax.swing.*;
  * The Board and Cell classes are separated in their own classes.
  */
 public class GameMain extends JPanel {
-    private static final long serialVersionUID = 1L; // to prevent serializable warning
+    private static final long serialVersionUID = 1L;
 
-    // Define named constants for the drawing graphics
     public static final String TITLE = "Tic Tac Toe";
     public static final Color COLOR_BG = Color.BLACK;
     public static final Color COLOR_BG_STATUS = Color.BLACK;
-    public static final Color COLOR_CROSS = new Color(239, 105, 80);  // Red #EF6950
-    public static final Color COLOR_NOUGHT = new Color(64, 154, 225); // Blue #409AE1
     public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
 
-    // Define game objects
-    private Board board;         // the game board
-    private State currentState;  // the current state of the game
-    private Seed currentPlayer;  // the current player
-    private JLabel statusBar;    // for displaying status message
+    private Board board;
+    private State currentState;
+    private Seed currentPlayer;
 
-    // === NEW: Timer related ===
+    private JLabel statusBar;
     private JLabel timerLabel;
+    private JLabel scoreLabel;
+
     private Timer turnTimer;
     private int timeLeft = 10;
-    // ==========================
 
-    /** Constructor to setup the UI and game components */
+    private String player1Name = "PACMAN";
+    private String player2Name = "GHOST";
+    private int score1 = 0;
+    private int score2 = 0;
+
     public GameMain() {
+        board = new Board();
 
-        // This JPanel fires MouseEvent
         super.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int mouseX = e.getX();
                 int mouseY = e.getY();
+
                 int row = mouseY / Cell.SIZE;
                 int col = mouseX / Cell.SIZE;
 
@@ -58,7 +59,10 @@ public class GameMain extends JPanel {
                         } else {
                             stopTurnTimer();
                             SoundEffect.EXPLODE.play();
+                            if (currentState == State.CROSS_WON) score1++;
+                            if (currentState == State.NOUGHT_WON) score2++;
                         }
+                        scoreLabel.setText(player1Name + ": " + score1 + "   |   " + player2Name + ": " + score2);
                     }
                 } else {
                     newGame();
@@ -67,6 +71,7 @@ public class GameMain extends JPanel {
             }
         });
 
+        // Status Bar
         statusBar = new JLabel();
         statusBar.setFont(FONT_STATUS);
         statusBar.setBackground(COLOR_BG_STATUS);
@@ -75,19 +80,40 @@ public class GameMain extends JPanel {
         statusBar.setHorizontalAlignment(JLabel.LEFT);
         statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
 
-        // === NEW: Setup timer label ===
+        // Timer Label
         timerLabel = new JLabel("Time left: 10 seconds");
         timerLabel.setFont(FONT_STATUS);
-        timerLabel.setHorizontalAlignment(JLabel.CENTER);
+        timerLabel.setHorizontalAlignment(JLabel.LEFT);
         timerLabel.setOpaque(true);
         timerLabel.setBackground(COLOR_BG_STATUS);
         timerLabel.setForeground(Color.WHITE);
         timerLabel.setPreferredSize(new Dimension(300, 30));
 
+        // Score Label
+        scoreLabel = new JLabel(player1Name + ": 0   |   " + player2Name + ": 0");
+        scoreLabel.setFont(FONT_STATUS);
+        scoreLabel.setBackground(COLOR_BG_STATUS);
+        scoreLabel.setOpaque(true);
+        scoreLabel.setPreferredSize(new Dimension(300, 30));
+        scoreLabel.setHorizontalAlignment(JLabel.LEFT);
+        scoreLabel.setForeground(Color.WHITE);
+
+        // Right panel: Timer + Score
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+        rightPanel.setBackground(COLOR_BG);
+        rightPanel.add(Box.createVerticalStrut(40));
+        rightPanel.add(timerLabel);
+        rightPanel.add(Box.createVerticalStrut(10));
+        rightPanel.add(scoreLabel);
+        rightPanel.setPreferredSize(new Dimension(250, Board.CANVAS_HEIGHT));
+
+        // Main layout
         setLayout(new BorderLayout());
-        add(timerLabel, BorderLayout.PAGE_START); // NEW
-        add(statusBar, BorderLayout.PAGE_END);
-        setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 60));
+        add(statusBar, BorderLayout.SOUTH);
+        add(rightPanel, BorderLayout.EAST);
+
+        setPreferredSize(new Dimension(Board.CANVAS_WIDTH + 250, Board.CANVAS_HEIGHT + 30));
         setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
 
         initGame();
@@ -106,10 +132,9 @@ public class GameMain extends JPanel {
         }
         currentPlayer = Seed.CROSS;
         currentState = State.PLAYING;
-        startTurnTimer(); // NEW
+        startTurnTimer();
     }
 
-    // === NEW: Timer methods ===
     private void startTurnTimer() {
         if (turnTimer != null) turnTimer.stop();
         timeLeft = 10;
@@ -135,7 +160,6 @@ public class GameMain extends JPanel {
     private void stopTurnTimer() {
         if (turnTimer != null) turnTimer.stop();
     }
-    // ===========================
 
     @Override
     public void paintComponent(Graphics g) {
@@ -144,17 +168,17 @@ public class GameMain extends JPanel {
         board.paint(g);
 
         if (currentState == State.PLAYING) {
-            statusBar.setForeground(Color.BLACK);
+            statusBar.setForeground(Color.WHITE);
             statusBar.setText((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn");
         } else if (currentState == State.DRAW) {
             statusBar.setForeground(Color.RED);
             statusBar.setText("It's a Draw! Click to play again.");
         } else if (currentState == State.CROSS_WON) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("'X' Won! Click to play again.");
+            statusBar.setText("Pacman Won! Click to play again.");
         } else if (currentState == State.NOUGHT_WON) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("'O' Won! Click to play again.");
+            statusBar.setText("Ghost Won! Click to play again.");
         }
     }
 
@@ -169,3 +193,4 @@ public class GameMain extends JPanel {
         });
     }
 }
+

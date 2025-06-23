@@ -64,4 +64,11 @@ public enum SoundEffect {
     static void initGame() {
         values();
     }
+
+    public void stop() {
+        if (clip != null && clip.isRunning()) {
+            clip.stop();
+        }
+    }
+
 }

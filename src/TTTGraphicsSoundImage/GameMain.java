@@ -192,7 +192,7 @@ public class GameMain extends JPanel {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            JOptionPane.showMessageDialog(null, "Welcome to the Tic-Tac-Toe game!", "Welcome", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Welcome to the Tic-Tac-Toe Game!", "Welcome", JOptionPane.INFORMATION_MESSAGE);
 
             String name1 = JOptionPane.showInputDialog("Enter name for Player X (Pacman):");
             if (name1 == null || name1.trim().isEmpty()) name1 = "Pacman";

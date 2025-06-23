@@ -159,11 +159,27 @@ public class GameMain extends JPanel {
                 timerLabel.setText("Time left: " + timeLeft + " seconds");
                 if (timeLeft <= 0) {
                     turnTimer.stop();
-                    currentState = (currentPlayer == Seed.CROSS) ? State.NOUGHT_WON : State.CROSS_WON;
-                    repaint();
+
+                    // Tentukan pemenang karena lawan kehabisan waktu
+                    boolean crossWins = (currentPlayer == Seed.NOUGHT); // lawan dari NOUGHT adalah CROSS
+                    currentState = crossWins ? State.CROSS_WON : State.NOUGHT_WON;
+
+                    // Tambah skor untuk lawan
+                    if (crossWins) score1++;
+                    else score2++;
+
+                    // Update skor
+                    scoreLabel.setText(player1Name + ": " + score1 + "   |   " + player2Name + ": " + score2);
+
+                    // Mainkan suara menang
                     SoundEffect.WIN.play();
-                    JOptionPane.showMessageDialog(null,
-                            "Time is up! " + (currentPlayer == Seed.CROSS ? player1Name + " (Pacman)" : player2Name + " (Ghost)") + " lost.");
+
+                    // Tampilkan pesan
+                    String winner = crossWins ? player1Name + " (Pacman)" : player2Name + " (Ghost)";
+                    String loser = (currentPlayer == Seed.CROSS) ? player1Name + " (Pacman)" : player2Name + " (Ghost)";
+                    JOptionPane.showMessageDialog(null, "Time is up! " + loser + " lose.");
+
+                    repaint();
                 }
             }
         });

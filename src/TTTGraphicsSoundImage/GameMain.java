@@ -27,12 +27,16 @@ public class GameMain extends JPanel {
     private Timer turnTimer;
     private int timeLeft = 10;
 
-    private String player1Name = "PACMAN";
-    private String player2Name = "GHOST";
+    private String player1Name;
+    private String player2Name;
     private int score1 = 0;
     private int score2 = 0;
+    private int roundCounter = 0; // track round number
 
-    public GameMain() {
+    public GameMain(String player1Name, String player2Name) {
+        this.player1Name = player1Name;
+        this.player2Name = player2Name;
+
         board = new Board();
 
         super.addMouseListener(new MouseAdapter() {
@@ -132,7 +136,9 @@ public class GameMain extends JPanel {
                 board.cells[row][col].content = Seed.NO_SEED;
             }
         }
-        currentPlayer = Seed.CROSS;
+        // Alternating first turn by round number
+        currentPlayer = (roundCounter % 2 == 0) ? Seed.CROSS : Seed.NOUGHT;
+        roundCounter++;
         currentState = State.PLAYING;
         startTurnTimer();
     }
@@ -152,7 +158,7 @@ public class GameMain extends JPanel {
                     repaint();
                     SoundEffect.EXPLODE.play();
                     JOptionPane.showMessageDialog(null,
-                            "Waktu habis! Pemain " + (currentPlayer == Seed.CROSS ? "X" : "O") + " kalah.");
+                            "Time is up! " + (currentPlayer == Seed.CROSS ? player1Name + " (Pacman)" : player2Name + " (Ghost)") + " lost.");
                 }
             }
         });
@@ -171,23 +177,36 @@ public class GameMain extends JPanel {
 
         if (currentState == State.PLAYING) {
             statusBar.setForeground(Color.WHITE);
-            statusBar.setText((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn");
+            statusBar.setText((currentPlayer == Seed.CROSS) ? player1Name + "'s Turn (Pacman)" : player2Name + "'s Turn (Ghost)");
         } else if (currentState == State.DRAW) {
             statusBar.setForeground(Color.RED);
             statusBar.setText("It's a Draw! Click to play again.");
         } else if (currentState == State.CROSS_WON) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("Pacman Won! Click to play again.");
+            statusBar.setText(player1Name + " Won! Click to play again.");
         } else if (currentState == State.NOUGHT_WON) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("Ghost Won! Click to play again.");
+            statusBar.setText(player2Name + " Won! Click to play again.");
         }
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(null, "Welcome to the Tic-Tac-Toe game!", "Welcome", JOptionPane.INFORMATION_MESSAGE);
+
+            String name1 = JOptionPane.showInputDialog("Enter name for Player X (Pacman):");
+            if (name1 == null || name1.trim().isEmpty()) name1 = "Pacman";
+
+            String name2 = JOptionPane.showInputDialog("Enter name for Player O (Ghost):");
+            if (name2 == null || name2.trim().isEmpty()) name2 = "Ghost";
+
+            int response = JOptionPane.showConfirmDialog(null, "Start the game?", "Start Game", JOptionPane.YES_NO_OPTION);
+            if (response != JOptionPane.YES_OPTION) {
+                System.exit(0);
+            }
+
             JFrame frame = new JFrame(TITLE);
-            frame.setContentPane(new GameMain());
+            frame.setContentPane(new GameMain(name1, name2));
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.pack();
             frame.setLocationRelativeTo(null);
@@ -195,4 +214,3 @@ public class GameMain extends JPanel {
         });
     }
 }
-

@@ -38,6 +38,7 @@ public class GameMain extends JPanel {
         this.player2Name = player2Name;
 
         board = new Board();
+        SoundEffect.BACKGROUND.playLoop();
 
         super.addMouseListener(new MouseAdapter() {
             @Override
@@ -54,15 +55,19 @@ public class GameMain extends JPanel {
                         currentState = board.stepGame(currentPlayer, row, col);
 
                         if (currentState == State.PLAYING) {
+                            if (currentPlayer == Seed.CROSS) {
+                                SoundEffect.GHOST.play();
+                            } else {
+                                SoundEffect.PACMAN.play();
+                            }
                             currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
                             startTurnTimer();
-                            SoundEffect.DIE.play();
                         } else if (currentState == State.DRAW) {
                             stopTurnTimer();
-                            SoundEffect.EAT_FOOD.play();
+                            SoundEffect.DRAW.play();
                         } else {
                             stopTurnTimer();
-                            SoundEffect.EXPLODE.play();
+                            SoundEffect.WIN.play();
                             if (currentState == State.CROSS_WON) score1++;
                             if (currentState == State.NOUGHT_WON) score2++;
                         }
@@ -156,7 +161,7 @@ public class GameMain extends JPanel {
                     turnTimer.stop();
                     currentState = (currentPlayer == Seed.CROSS) ? State.NOUGHT_WON : State.CROSS_WON;
                     repaint();
-                    SoundEffect.EXPLODE.play();
+                    SoundEffect.WIN.play();
                     JOptionPane.showMessageDialog(null,
                             "Time is up! " + (currentPlayer == Seed.CROSS ? player1Name + " (Pacman)" : player2Name + " (Ghost)") + " lost.");
                 }
@@ -211,6 +216,7 @@ public class GameMain extends JPanel {
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
+            SoundEffect.BACKGROUND.play();
         });
     }
 }

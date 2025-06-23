@@ -13,9 +13,10 @@ import javax.sound.sampled.UnsupportedAudioFileException;
  * codes from the game codes.
  */
 public enum SoundEffect {
-    EAT_FOOD("audio/eatfood.wav"),
-    EXPLODE("audio/explode.wav"),
-    DIE("audio/die.wav"),
+    GHOST("audio/ghost.wav"),
+    PACMAN("audio/pacman.wav"),
+    DRAW("audio/draw.wav"),
+    WIN("audio/win.wav"),
     BACKGROUND("audio/background.wav");
 
     /** Nested enumeration for specifying volume */

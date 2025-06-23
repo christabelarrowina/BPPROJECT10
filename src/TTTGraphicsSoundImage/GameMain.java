@@ -83,7 +83,8 @@ public class GameMain extends JPanel {
         // Timer Label
         timerLabel = new JLabel("Time left: 10 seconds");
         timerLabel.setFont(FONT_STATUS);
-        timerLabel.setHorizontalAlignment(JLabel.LEFT);
+        timerLabel.setHorizontalAlignment(JLabel.CENTER);
+        timerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         timerLabel.setOpaque(true);
         timerLabel.setBackground(COLOR_BG_STATUS);
         timerLabel.setForeground(Color.WHITE);
@@ -95,7 +96,8 @@ public class GameMain extends JPanel {
         scoreLabel.setBackground(COLOR_BG_STATUS);
         scoreLabel.setOpaque(true);
         scoreLabel.setPreferredSize(new Dimension(300, 30));
-        scoreLabel.setHorizontalAlignment(JLabel.LEFT);
+        scoreLabel.setHorizontalAlignment(JLabel.CENTER);
+        scoreLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         scoreLabel.setForeground(Color.WHITE);
 
         // Right panel: Timer + Score

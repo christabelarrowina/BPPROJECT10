@@ -70,18 +70,25 @@ public class GameMain extends JPanel {
         statusBar.setBackground(COLOR_BG_STATUS);
         statusBar.setOpaque(true);
         statusBar.setPreferredSize(new Dimension(300, 30));
+        statusBar.setHorizontalAlignment(JLabel.LEFT);
+        statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
 
         timerLabel = new JLabel("Time left: 10 seconds");
         timerLabel.setFont(FONT_STATUS);
         timerLabel.setHorizontalAlignment(JLabel.CENTER);
+        timerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         timerLabel.setOpaque(true);
         timerLabel.setBackground(COLOR_BG_STATUS);
         timerLabel.setForeground(Color.WHITE);
+        timerLabel.setPreferredSize(new Dimension(300, 30));
 
         scoreLabel = new JLabel();
         scoreLabel.setFont(FONT_STATUS);
         scoreLabel.setBackground(COLOR_BG_STATUS);
         scoreLabel.setOpaque(true);
+        scoreLabel.setPreferredSize(new Dimension(300, 140));
+        scoreLabel.setHorizontalAlignment(JLabel.CENTER);
+        scoreLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         scoreLabel.setForeground(Color.WHITE);
         updateScoreLabel();
 
@@ -92,11 +99,13 @@ public class GameMain extends JPanel {
         rightPanel.add(timerLabel);
         rightPanel.add(Box.createVerticalStrut(10));
         rightPanel.add(scoreLabel);
+        rightPanel.setPreferredSize(new Dimension(250, Board.CANVAS_HEIGHT));
 
         setLayout(new BorderLayout());
         add(statusBar, BorderLayout.SOUTH);
         add(rightPanel, BorderLayout.EAST);
         setPreferredSize(new Dimension(Board.CANVAS_WIDTH + 250, Board.CANVAS_HEIGHT + 30));
+        setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
 
         initGame();
         newGame();
@@ -104,8 +113,8 @@ public class GameMain extends JPanel {
 
     private void updateScoreLabel() {
         scoreLabel.setText("<html><div style='text-align: center;'>" +
-                player1Name + ": " + score1 + "<br>" +
-                player2Name + ": " + score2 + "</div></html>");
+                player1Name + ": " + score1 + "<br><img src='file:src/images/PacmanOKE.png' width='25' height='25'><br><br>" +
+                player2Name + ": " + score2 + "<br><img src='file:src/images/GhostOKE.png' width='25' height='25'></div></html>");
     }
 
     public void initGame() {
@@ -129,18 +138,22 @@ public class GameMain extends JPanel {
         timeLeft = 10;
         timerLabel.setText("Time left: " + timeLeft + " seconds");
 
-        turnTimer = new Timer(1000, e -> {
-            timeLeft--;
-            timerLabel.setText("Time left: " + timeLeft + " seconds");
-            if (timeLeft <= 0) {
-                turnTimer.stop();
-                currentState = (currentPlayer == Seed.NOUGHT) ? State.CROSS_WON : State.NOUGHT_WON;
-                if (currentState == State.CROSS_WON) score1++;
-                else score2++;
-                updateScoreLabel();
-                SoundEffect.WIN.play();
-                JOptionPane.showMessageDialog(null, "Time is up! " + currentPlayer + " loses.");
-                repaint();
+        turnTimer = new Timer(1000, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                timeLeft--;
+                timerLabel.setText("Time left: " + timeLeft + " seconds");
+                if (timeLeft <= 0) {
+                    turnTimer.stop();
+                    boolean crossWins = (currentPlayer == Seed.NOUGHT);
+                    currentState = crossWins ? State.CROSS_WON : State.NOUGHT_WON;
+                    if (crossWins) score1++;
+                    else score2++;
+                    updateScoreLabel();
+                    SoundEffect.WIN.play();
+                    String loser = (currentPlayer == Seed.CROSS) ? player1Name + " (Pacman)" : player2Name + " (Ghost)";
+                    JOptionPane.showMessageDialog(null, "Time is up! " + loser + " lose.");
+                    repaint();
+                }
             }
         });
         turnTimer.start();
@@ -155,17 +168,19 @@ public class GameMain extends JPanel {
         super.paintComponent(g);
         setBackground(COLOR_BG);
         board.paint(g);
+
         if (currentState == State.PLAYING) {
             statusBar.setForeground(Color.WHITE);
-            statusBar.setText(currentPlayer + "'s Turn");
-        } else {
+            statusBar.setText((currentPlayer == Seed.CROSS) ? player1Name + "'s Turn (Pacman)" : player2Name + "'s Turn (Ghost)");
+        } else if (currentState == State.DRAW) {
             statusBar.setForeground(Color.RED);
-            if (currentState == State.DRAW) {
-                SoundEffect.DRAW.play();
-                statusBar.setText("It's a Draw! Click to play again.");
-            } else {
-                statusBar.setText(currentPlayer + " Wins! Click to play again.");
-            }
+            statusBar.setText("It's a Draw! Click to play again.");
+        } else if (currentState == State.CROSS_WON) {
+            statusBar.setForeground(Color.RED);
+            statusBar.setText(player1Name + " Won! Click to play again.");
+        } else if (currentState == State.NOUGHT_WON) {
+            statusBar.setForeground(Color.RED);
+            statusBar.setText(player2Name + " Won! Click to play again.");
         }
     }
 
@@ -176,26 +191,58 @@ public class GameMain extends JPanel {
             System.out.println("Gagal set LookAndFeel. Menggunakan default.");
         }
 
-        SoundEffect.BACKGROUND.playLoop();
-
         String name1 = "", name2 = "Ghost";
         boolean validLogin = false;
-        do {
-            JPanel loginPanel = new JPanel(new GridLayout(2, 2));
-            loginPanel.add(new JLabel("Username:"));
-            JTextField userField = new JTextField();
-            loginPanel.add(userField);
-            loginPanel.add(new JLabel("Password:"));
-            JPasswordField passField = new JPasswordField();
-            loginPanel.add(passField);
+        JTextField userField = new JTextField();
+        JPasswordField passField = new JPasswordField();
 
-            int result = JOptionPane.showConfirmDialog(null, loginPanel, "Login", JOptionPane.OK_CANCEL_OPTION);
+        UIManager.put("OptionPane.background", Color.BLACK);
+        UIManager.put("Panel.background", Color.BLACK);
+        UIManager.put("OptionPane.messageForeground", Color.YELLOW);
+        UIManager.put("OptionPane.messageFont", new Font("OCR A Extended", Font.BOLD, 18));
+        UIManager.put("Button.background", Color.BLACK);
+        UIManager.put("Button.foreground", Color.BLACK);
+
+        do {
+            JPanel loginPanel = new JPanel();
+            loginPanel.setLayout(new BoxLayout(loginPanel, BoxLayout.Y_AXIS));
+            loginPanel.setBackground(Color.BLACK);
+            loginPanel.setPreferredSize(new Dimension(300, 160));
+
+            JLabel loginLabel = new JLabel("LOGIN");
+            loginLabel.setFont(new Font("OCR A Extended", Font.BOLD, 22));
+            loginLabel.setForeground(Color.YELLOW);
+            loginLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            loginLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+            JLabel userLabel = new JLabel("Username:");
+            userLabel.setForeground(Color.WHITE);
+            userLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            JLabel passLabel = new JLabel("Password:");
+            passLabel.setForeground(Color.WHITE);
+            passLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            userField.setMaximumSize(new Dimension(250, 30));
+            passField.setMaximumSize(new Dimension(250, 30));
+
+            loginPanel.add(Box.createVerticalStrut(15));
+            loginPanel.add(loginLabel);
+            loginPanel.add(Box.createVerticalStrut(10));
+            loginPanel.add(userLabel);
+            loginPanel.add(userField);
+            loginPanel.add(Box.createVerticalStrut(5));
+            loginPanel.add(passLabel);
+            loginPanel.add(passField);
+            loginPanel.add(Box.createVerticalStrut(15));
+
+            int result = JOptionPane.showConfirmDialog(null, loginPanel, "Login", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (result == JOptionPane.OK_OPTION) {
                 String username = userField.getText().trim();
                 String password = new String(passField.getPassword()).trim();
-                String truePassword = getPassword(username).trim();
+                String truePassword = getPassword(username);
 
-                if (!truePassword.isEmpty() && password.equals(truePassword)) {
+                if (truePassword != null && password.equals(truePassword)) {
                     name1 = username;
                     validLogin = true;
                 } else {
@@ -206,103 +253,111 @@ public class GameMain extends JPanel {
             }
         } while (!validLogin);
 
-        // Welcome panel
-        JPanel welcomePanel = new JPanel();
-        welcomePanel.setLayout(new BoxLayout(welcomePanel, BoxLayout.Y_AXIS));
-        welcomePanel.setBackground(Color.BLACK);
-        welcomePanel.setPreferredSize(new Dimension(420, 240));
-
-        JLabel title = new JLabel("Welcome to Pacman Tic Tac Toe!", SwingConstants.CENTER);
-        title.setFont(new Font("OCR A Extended", Font.BOLD, 22));
-        title.setForeground(Color.YELLOW);
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel pacmanImg = new JLabel(new ImageIcon(new ImageIcon("src/images/PacmanOKE.png").getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH)));
-        JLabel ghostImg = new JLabel(new ImageIcon(new ImageIcon("src/images/GhostOKE.png").getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH)));
-
-        JPanel iconPanel = new JPanel();
-        iconPanel.setBackground(Color.BLACK);
-        iconPanel.add(pacmanImg);
-        iconPanel.add(Box.createRigidArea(new Dimension(20, 0)));
-        iconPanel.add(ghostImg);
-
-        welcomePanel.add(Box.createVerticalStrut(10));
-        welcomePanel.add(title);
-        welcomePanel.add(Box.createVerticalStrut(15));
-        welcomePanel.add(iconPanel);
-
-        JOptionPane.showMessageDialog(null, welcomePanel, "Welcome", JOptionPane.PLAIN_MESSAGE);
-
-        // Input name panel
-        JPanel inputPanel = new JPanel();
-        inputPanel.setBackground(Color.BLACK);
-        inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
-        inputPanel.setPreferredSize(new Dimension(420, 240));
-
-        JLabel label1 = new JLabel("Player X (Pacman):", SwingConstants.RIGHT);
-        label1.setForeground(Color.YELLOW);
-        label1.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        JTextField player1Field = new JTextField(name1);
-
-        JLabel label2 = new JLabel("Player O (Ghost):", SwingConstants.RIGHT);
-        label2.setForeground(Color.CYAN);
-        label2.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        JTextField player2Field = new JTextField("Ghost");
-
-        inputPanel.add(label1);
-        inputPanel.add(player1Field);
-        inputPanel.add(Box.createVerticalStrut(10));
-        inputPanel.add(label2);
-        inputPanel.add(player2Field);
-
-        JPanel inputIconPanel = new JPanel();
-        inputIconPanel.setBackground(Color.BLACK);
-        inputIconPanel.add(new JLabel(new ImageIcon(new ImageIcon("src/images/PacmanOKE.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH))));
-        inputIconPanel.add(Box.createRigidArea(new Dimension(20, 0)));
-        inputIconPanel.add(new JLabel(new ImageIcon(new ImageIcon("src/images/GhostOKE.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH))));
-        inputPanel.add(Box.createVerticalStrut(15));
-        inputPanel.add(inputIconPanel);
-
-        int inputResult = JOptionPane.showConfirmDialog(null, inputPanel, "Enter Player Names", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        if (inputResult != JOptionPane.OK_OPTION) System.exit(0);
-
-        name1 = player1Field.getText().trim();
-        name2 = player2Field.getText().trim();
-        if (name1.isEmpty()) name1 = "Pacman";
-        if (name2.isEmpty()) name2 = "Ghost";
-
-        // Start panel
-        JPanel startPanel = new JPanel();
-        startPanel.setLayout(new BoxLayout(startPanel, BoxLayout.Y_AXIS));
-        startPanel.setBackground(Color.BLACK);
-        startPanel.setPreferredSize(new Dimension(420, 240));
-
-        JLabel startLabel = new JLabel("Start Game", SwingConstants.CENTER);
-        startLabel.setFont(new Font("OCR A Extended", Font.BOLD, 22));
-        startLabel.setForeground(Color.GREEN);
-        startLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JPanel startIcons = new JPanel();
-        startIcons.setBackground(Color.BLACK);
-        startIcons.add(new JLabel(new ImageIcon(new ImageIcon("src/images/PacmanOKE.png").getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH))));
-        startIcons.add(Box.createRigidArea(new Dimension(20, 0)));
-        startIcons.add(new JLabel(new ImageIcon(new ImageIcon("src/images/GhostOKE.png").getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH))));
-
-        startPanel.add(Box.createVerticalStrut(10));
-        startPanel.add(startLabel);
-        startPanel.add(Box.createVerticalStrut(15));
-        startPanel.add(startIcons);
-
-        JOptionPane.showMessageDialog(null, startPanel, "Start", JOptionPane.PLAIN_MESSAGE);
-
-        SoundEffect.BACKGROUND.stop();
-
-        String finalName1 = name1;
-        String finalName2 = name2;
-
         SwingUtilities.invokeLater(() -> {
+            SoundEffect.BACKGROUND.playLoop(); // loop the background sound during welcome and input
+
+            UIManager.put("OptionPane.background", Color.BLACK);
+            UIManager.put("Panel.background", Color.BLACK);
+            UIManager.put("OptionPane.messageForeground", Color.YELLOW);
+            UIManager.put("OptionPane.messageFont", new Font("OCR A Extended", Font.BOLD, 18));
+            UIManager.put("Button.background", Color.BLACK);
+            UIManager.put("Button.foreground", Color.BLACK);
+
+            int dialogWidth = 320;
+            int dialogHeight = 140;
+
+            JPanel welcomePanel = new JPanel();
+            welcomePanel.setLayout(new BoxLayout(welcomePanel, BoxLayout.Y_AXIS));
+            welcomePanel.setBackground(Color.BLACK);
+            welcomePanel.setPreferredSize(new Dimension(dialogWidth, dialogHeight));
+
+            JLabel title = new JLabel("Welcome to Pacman Tic Tac Toe!", SwingConstants.CENTER);
+            title.setFont(new Font("OCR A Extended", Font.BOLD, 18));
+            title.setForeground(Color.YELLOW);
+            title.setAlignmentX(Component.CENTER_ALIGNMENT);
+            title.setHorizontalAlignment(SwingConstants.CENTER);
+
+            JLabel pacmanImg = new JLabel(new ImageIcon(new ImageIcon("src/images/PacmanOKE.png").getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH)));
+            JLabel ghostImg = new JLabel(new ImageIcon(new ImageIcon("src/images/GhostOKE.png").getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH)));
+
+            JPanel iconPanel = new JPanel();
+            iconPanel.setBackground(Color.BLACK);
+            iconPanel.add(pacmanImg);
+            iconPanel.add(Box.createRigidArea(new Dimension(20, 0)));
+            iconPanel.add(ghostImg);
+
+            welcomePanel.add(Box.createVerticalStrut(10));
+            welcomePanel.add(title);
+            welcomePanel.add(Box.createVerticalStrut(15));
+            welcomePanel.add(iconPanel);
+
+            JOptionPane.showMessageDialog(null, welcomePanel, "Welcome", JOptionPane.PLAIN_MESSAGE);
+
+            JPanel inputPanel = new JPanel();
+            inputPanel.setBackground(Color.BLACK);
+            inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
+            inputPanel.setPreferredSize(new Dimension(dialogWidth, dialogHeight));
+
+            JLabel label1 = new JLabel("Player X (Pacman):", SwingConstants.RIGHT);
+            label1.setForeground(Color.YELLOW);
+            label1.setAlignmentX(Component.RIGHT_ALIGNMENT);
+            JTextField player1Field = new JTextField("Pacman");
+
+            JLabel label2 = new JLabel("Player O (Ghost):", SwingConstants.RIGHT);
+            label2.setForeground(Color.CYAN);
+            label2.setAlignmentX(Component.RIGHT_ALIGNMENT);
+            JTextField player2Field = new JTextField("Ghost");
+
+            inputPanel.add(label1);
+            inputPanel.add(player1Field);
+            inputPanel.add(Box.createVerticalStrut(10));
+            inputPanel.add(label2);
+            inputPanel.add(player2Field);
+
+            JPanel inputIconPanel = new JPanel();
+            inputIconPanel.setBackground(Color.BLACK);
+            inputIconPanel.add(new JLabel(new ImageIcon(new ImageIcon("src/images/PacmanOKE.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH))));
+            inputIconPanel.add(Box.createRigidArea(new Dimension(20, 0)));
+            inputIconPanel.add(new JLabel(new ImageIcon(new ImageIcon("src/images/GhostOKE.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH))));
+            inputPanel.add(Box.createVerticalStrut(15));
+            inputPanel.add(inputIconPanel);
+
+            int result = JOptionPane.showConfirmDialog(null, inputPanel, "Enter Player Names", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (result != JOptionPane.OK_OPTION) System.exit(0);
+
+            String name3 = player1Field.getText().trim();
+            String name4 = player2Field.getText().trim();
+            if (name3.isEmpty()) name3 = "Pacman";
+            if (name4.isEmpty()) name4 = "Ghost";
+
+            JPanel startPanel = new JPanel();
+            startPanel.setLayout(new BoxLayout(startPanel, BoxLayout.Y_AXIS));
+            startPanel.setBackground(Color.BLACK);
+            startPanel.setPreferredSize(new Dimension(dialogWidth, dialogHeight));
+
+            JLabel startLabel = new JLabel("Start Game", SwingConstants.CENTER);
+            startLabel.setFont(new Font("OCR A Extended", Font.BOLD, 22));
+            startLabel.setForeground(Color.GREEN);
+            startLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            startLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+            JPanel startIcons = new JPanel();
+            startIcons.setBackground(Color.BLACK);
+            startIcons.add(new JLabel(new ImageIcon(new ImageIcon("src/images/PacmanOKE.png").getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH))));
+            startIcons.add(Box.createRigidArea(new Dimension(20, 0)));
+            startIcons.add(new JLabel(new ImageIcon(new ImageIcon("src/images/GhostOKE.png").getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH))));
+
+            startPanel.add(Box.createVerticalStrut(10));
+            startPanel.add(startLabel);
+            startPanel.add(Box.createVerticalStrut(15));
+            startPanel.add(startIcons);
+
+            JOptionPane.showMessageDialog(null, startPanel, "Start", JOptionPane.PLAIN_MESSAGE);
+
+            SoundEffect.BACKGROUND.stop(); // stop background music when game starts
+
             JFrame frame = new JFrame(TITLE);
-            frame.setContentPane(new GameMain(finalName1, finalName2));
+            frame.setContentPane(new GameMain(name3, name4));
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.pack();
             frame.setLocationRelativeTo(null);
@@ -310,34 +365,29 @@ public class GameMain extends JPanel {
         });
     }
 
-    static String getPassword(String uName) throws ClassNotFoundException {
-        String host = "bpproject10-testdasprog.f.aivencloud.com";
-        String userName = "avnadmin";
-        String password = "AVNS_xOz5nCnbxocrZK2nM_P";
-        String databaseName = "tictactoedb";
-        String port = "23464";
 
+    static String getPassword(String username) throws ClassNotFoundException {
         String userPassword = null;
-        try {
-            Connection connection = DriverManager.getConnection(
-                    "jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?sslmode=require",
-                    userName, password
-            );
-            String query = "SELECT password FROM game_user WHERE username = ?";
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, uName);
-            ResultSet resultSet = statement.executeQuery();
+        String host = "bpproject10-testdasprog.f.aivencloud.com";
+        String port = "23464";
+        String dbName = "tictactoedb";
+        String dbUser = "avnadmin";
+        String dbPass = "AVNS_xOz5nCnbxocrZK2nM_P";
 
+        String url = "jdbc:mysql://" + host + ":" + port + "/" + dbName + "?sslmode=require";
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        try (Connection connection = DriverManager.getConnection(url, dbUser, dbPass);
+             PreparedStatement statement = connection.prepareStatement("SELECT password FROM game_user WHERE username = ?")) {
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 userPassword = resultSet.getString("password");
             }
-
             resultSet.close();
-            statement.close();
-            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return (userPassword != null) ? userPassword : "";
+        return userPassword;
     }
 }
